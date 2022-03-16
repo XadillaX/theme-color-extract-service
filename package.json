@@ -1,0 +1,24 @@
+{
+  "name": "theme-color",
+  "version": "0.0.1",
+  "license": "MIT",
+  "scripts": {
+    "start": "node ./bin/www",
+    "build": "echo build",
+    "postinstall": "rm -f package-lock.json"
+  },
+  "dependencies": {
+    "connect-multiparty": "^2.2.0",
+    "debug": "^2.6.9",
+    "express": "^4.16.1",
+    "hbs": "^4.0.4",
+    "http-errors": "^1.6.3",
+    "morgan": "^1.9.1",
+    "thmclrx": "^2.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.21",
+    "eslint": "^8.11.0",
+    "eslint-config-egg": "^11.0.1"
+  }
+}

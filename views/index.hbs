@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Theme Color Extracting Tool</title>
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+  <style>
+  .color {
+    width: 60px;
+    height: 60px;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    float: left;
+    font-size: 9px;
+    display: table-cell;
+    text-align: center;
+    border-radius: 5px;
+  }
+  </style>
+  <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+  <table style="border-spacing: 0; width: 100%;">
+    <tr>
+      <td style="width: 330px; padding: 0; margin: 0; vertical-align: top;">
+        <h1>Extract Theme Color</h1>
+        <form method="post" action="/extract" id="form" enctype="multipart/form-data">
+          <table>
+            <tr>
+              <td><label for="max-color-count">Max Result Count</label></td>
+              <td><input type="number" name="max-color-count" id="max-color-count" value="32" /></td>
+            </tr>
+            <tr>
+              <td><label for="file">Picture</label></td>
+              <td><input type="file" name="file" id="file" /></td>
+            </tr>
+            <tr>
+              <td colspan="2">
+                <input type="submit" value="Extract!" />
+                <input type="reset" value="Reset" />
+              </td>
+            </tr>
+          </table>
+        </form>
+      </td>
+      <td id="result">
+      </td>
+    </tr>
+  </div>
+
+  <script>
+  function getImageUrl(arrayBuffer) {
+    const arrayBufferView = new Uint8Array(arrayBuffer);
+    const blob = new Blob([arrayBufferView], { type: "image/jpeg" });
+    const urlCreator = window.URL || window.webkitURL;
+    const imageUrl = urlCreator.createObjectURL(blob);
+    return imageUrl;
+  }
+
+  $(() => {
+    $('form').submit(e => {
+      e.preventDefault();
+      const formData = new FormData($('form')[0]);
+      const file = formData.get('file');
+      if (!file?.size) {
+        alert('Please select a file.');
+        return;
+      }
+
+      const colorCount = parseInt(formData.get('max-color-count'));
+      if (isNaN(colorCount) || colorCount < 1) {
+        alert('Please input correct max result count');
+        return;
+      }
+
+      $.ajax({
+        url: '/extract',
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: async data => {
+          if (!data || data.status !== 200) {
+            alert('Failed to extract theme color.');
+            return;
+          }
+
+          $('#result').html('');
+          const { colors } = data;
+          for (const color of colors) {
+            const colorElement = $('<div class="color"></div>');
+            colorElement.css('background-color', `#${color.color}`);
+            $('#result').append(colorElement);
+          }
+
+          $('#result').append('<div style="float: clear;"></div>');
+          const imgUrl = getImageUrl(await file.arrayBuffer());
+          $('#result').append('<img src="#" style="width: 100%;" />');
+          $('#result img').attr('src', imgUrl);
+        },
+        error: err => {
+          alert(err.responseText);
+        },
+      });
+    });
+  });
+  </script>
+</body>
+</html>
